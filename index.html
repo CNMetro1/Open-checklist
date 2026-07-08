@@ -1,0 +1,188 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1A1C21">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>CN Metro: Opening Checklist</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --audit-bg: #F8F9FA; --audit-text-main: #1A1C21; --audit-text-muted: #6B7280; --audit-border: #E5E7EB; --audit-accent-green: #22C55E; --audit-input-bg: #F9FAFB; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--audit-bg); color: var(--audit-text-main); min-height: 100vh; padding-bottom: 3rem; -webkit-tap-highlight-color: transparent; }
+        .main-container { background-color: white; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid var(--audit-border); }
+        .audit-title { font-weight: 800; font-size: 2.25rem; line-height: 1.1; letter-spacing: -0.02em; }
+        .input-label { font-weight: 700; font-size: 0.9rem; color: var(--audit-text-main); margin-bottom: 0.5rem; display: block; }
+        .audit-input { width: 100%; padding: 0.875rem 1rem; background-color: var(--audit-input-bg); border: 1px solid var(--audit-border); border-radius: 0.75rem; font-size: 1rem; }
+        .readonly-input { background-color: #F3F4F6; cursor: not-allowed; color: #6B7280; }
+        .checkbox-custom { width: 1.5rem; height: 1.5rem; border: 2px solid var(--audit-border); border-radius: 0.4rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+        .checkbox-custom.checked { background-color: var(--audit-text-main); border-color: var(--audit-text-main); }
+        .btn-clear { border: 1px solid var(--audit-border); padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; color: var(--audit-text-main); }
+        .btn-primary { background-color: var(--audit-text-main); color: white; padding: 1rem; border-radius: 0.75rem; font-weight: 700; width: 100%; }
+        .expandable-container { transition: all 0.3s ease-in-out; max-height: 0; overflow: hidden; opacity: 0; }
+        .expandable-container.visible { max-height: 1500px; opacity: 1; margin-top: 1rem; }
+        .timestamp { font-size: 0.7rem; color: #9CA3AF; font-weight: 600; margin-left: auto; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto main-container p-6 md:p-10">
+        <header class="mb-8">
+            <h1 class="audit-title">Opening Checklist</h1>
+            <div class="flex justify-between items-center mt-6">
+                <button id="session-marker" class="text-emerald-500 font-bold text-sm">New Session.</button>
+                <button onclick="showClearConfirmation()" class="btn-clear">Clear All</button>
+            </div>
+        </header>
+
+        <div id="checklist-container" class="space-y-6 mb-12"></div>
+
+        <div class="space-y-8 pt-8 border-t border-gray-100">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="input-label">Date:</label>
+                    <input type="text" id="report-date" class="audit-input readonly-input" readonly>
+                </div>
+                <div>
+                    <label class="input-label">Opening Staff:</label>
+                    <input type="text" id="staff-name" oninput="saveData()" class="audit-input" placeholder="Staff Name">
+                </div>
+            </div>
+            <div>
+                <label class="input-label">Handover Notes:</label>
+                <textarea id="opening-notes" oninput="saveData()" class="audit-input min-h-[150px]" placeholder="Notes..."></textarea>
+            </div>
+            <button onclick="copySummary()" class="btn-primary">Copy Handover Summary</button>
+            <p id="copy-feedback" class="center text-center text-xs font-bold text-emerald-600 h-4 uppercase mt-2"></p>
+        </div>
+    </div>
+
+    <div id="clearModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 max-w-sm w-full rounded-2xl shadow-2xl">
+            <h3 class="text-xl font-extrabold mb-2">Clear everything?</h3>
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeModal()" class="flex-1 py-3 font-bold text-gray-400">Cancel</button>
+                <button onclick="performClear()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STEPS = [
+            { title: "Prep & Machines", items: ["Turn on Coffee Machines, Bar Ovens & Blenders", "Pre-heat Oven (190°C x10min)", "Turn dishwasher on", "Turn on boiler"] },
+            { title: "Pastries & Tills", items: ["Tray Pastries", "Bake Pastries (x20-30m)", "Bake De Nata's (x10-12min)", "Count the tills", "Count safe"] },
+            { title: "Setup & Finish", items: ["Bar set up", "Paperwork", "Restock"] }
+        ];
+        const PASTRIES = ["Butter Croissants x6", "Pain Au Choc x6", "Pain Au Raisin x9", "Cinnamon Swirl x6", "Apricot Croissants x6", "Raspberry Croissants x6", "Almond Croissants x12", "Pistachio Croissants x12", "Cinnamon Buns x6", "De Nata's x 3 boxes"];
+        const PAPERWORK = ["Temp Checks", "Card Reader Checks", "Coffee Checks"];
+
+        let taskState = JSON.parse(localStorage.getItem('open_task_state') || '{}');
+        let taskTime = JSON.parse(localStorage.getItem('open_task_time') || '{}');
+        let pastryState = JSON.parse(localStorage.getItem('open_pastry_state') || '{}');
+        let pastryTime = JSON.parse(localStorage.getItem('open_pastry_time') || '{}');
+        let paperState = JSON.parse(localStorage.getItem('open_paper_state') || '{}');
+        let paperTime = JSON.parse(localStorage.getItem('open_paper_time') || '{}');
+
+        function render() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+            
+            STEPS.forEach((section, sIdx) => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.innerHTML = `<h3 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">${section.title}</h3>`;
+                
+                section.items.forEach((item, iIdx) => {
+                    const id = `${sIdx}-${iIdx}`;
+                    const isDone = !!taskState[id];
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <div onclick="toggleTask('${id}')" class="flex items-center gap-4 p-4 border border-gray-100 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors mb-3">
+                            <div id="check-${id}" class="checkbox-custom ${isDone ? 'checked' : ''}">${isDone ? '<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5"><path d="M5 13l4 4L19 7"></path></svg>' : ''}</div>
+                            <p class="text-sm font-semibold text-gray-800">${item}</p>
+                            <span class="timestamp">${taskTime[id] || ''}</span>
+                        </div>
+                        ${(sIdx === 1 && iIdx === 0) ? `<div id="pastry-container" class="expandable-container ${taskState['1-0'] ? 'visible' : ''} mb-6 ml-4 border-l-2 border-gray-100 pl-4">${PASTRIES.map((p, pIdx) => `<div onclick="togglePastry(${pIdx})" class="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-50 rounded-lg"><div id="pcheck-${pIdx}" class="checkbox-custom w-6 h-6 ${pastryState[pIdx] ? 'checked' : ''}">${pastryState[pIdx] ? '<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5"><path d="M5 13l4 4L19 7"></path></svg>' : ''}</div><span class="text-sm font-medium text-gray-600">${p}</span><span class="timestamp">${pastryTime[pIdx] || ''}</span></div>`).join('')}</div>` : ''}
+                        ${(sIdx === 2 && iIdx === 1) ? `<div id="paper-container" class="expandable-container ${taskState['2-1'] ? 'visible' : ''} mb-6 ml-4 border-l-2 border-gray-100 pl-4">${PAPERWORK.map((p, pIdx) => `<div onclick="togglePaper(${pIdx})" class="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-50 rounded-lg"><div id="papercheck-${pIdx}" class="checkbox-custom w-6 h-6 ${paperState[pIdx] ? 'checked' : ''}">${paperState[pIdx] ? '<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5"><path d="M5 13l4 4L19 7"></path></svg>' : ''}</div><span class="text-sm font-medium text-gray-600">${p}</span><span class="timestamp">${paperTime[pIdx] || ''}</span></div>`).join('')}</div>` : ''}
+                        ${(sIdx === 2 && iIdx === 2) ? `<div id="restock-container" class="expandable-container ${taskState['2-2'] ? 'visible' : ''} mb-6 ml-4 border-l-2 border-gray-100 pl-4"><textarea id="restock-note" oninput="saveData()" class="audit-input text-sm mt-2" placeholder="List items restocked...">${localStorage.getItem('open_restock_note') || ''}</textarea></div>` : ''}
+                    `;
+                    sectionDiv.appendChild(div);
+                });
+                container.appendChild(sectionDiv);
+            });
+            updateSessionMarker();
+        }
+
+        window.toggleTask = (id) => {
+            taskState[id] = !taskState[id];
+            taskTime[id] = taskState[id] ? new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) : '';
+            localStorage.setItem('open_task_state', JSON.stringify(taskState));
+            localStorage.setItem('open_task_time', JSON.stringify(taskTime));
+            render();
+        };
+
+        window.togglePastry = (idx) => {
+            pastryState[idx] = !pastryState[idx];
+            pastryTime[idx] = pastryState[idx] ? new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) : '';
+            localStorage.setItem('open_pastry_state', JSON.stringify(pastryState));
+            localStorage.setItem('open_pastry_time', JSON.stringify(pastryTime));
+            render();
+        };
+
+        window.togglePaper = (idx) => {
+            paperState[idx] = !paperState[idx];
+            paperTime[idx] = paperState[idx] ? new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}) : '';
+            localStorage.setItem('open_paper_state', JSON.stringify(paperState));
+            localStorage.setItem('open_paper_time', JSON.stringify(paperTime));
+            render();
+        };
+
+        function updateSessionMarker() {
+            const hasData = Object.keys(taskState).length > 0 || localStorage.getItem('open_staff');
+            const marker = document.getElementById('session-marker');
+            marker.innerText = hasData ? "Saved Session." : "New Session.";
+            marker.className = hasData ? "text-blue-500 font-bold text-sm" : "text-emerald-500 font-bold text-sm";
+        }
+
+        window.saveData = () => {
+            localStorage.setItem('open_staff', document.getElementById('staff-name').value);
+            localStorage.setItem('open_notes', document.getElementById('opening-notes').value);
+            const restockEl = document.getElementById('restock-note');
+            if (restockEl) localStorage.setItem('open_restock_note', restockEl.value);
+            updateSessionMarker();
+        };
+
+        window.copySummary = () => {
+            const date = document.getElementById('report-date').value || "N/A";
+            const summary = `OPENING HANDOVER \n(${date})\nStaff: ${document.getElementById('staff-name').value || "N/A"}\n\nPastries Trayed: ${PASTRIES.filter((_, i) => pastryState[i]).join(', ') || "None"}\n\nNotes:\n${document.getElementById('opening-notes').value || "None"}`;
+            const textArea = document.createElement("textarea");
+            textArea.value = summary;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            const feedback = document.getElementById('copy-feedback');
+            feedback.innerText = "COPIED TO CLIPBOARD!";
+            setTimeout(() => feedback.innerText = "", 2000);
+        };
+
+        window.showClearConfirmation = () => document.getElementById('clearModal').classList.remove('hidden');
+        window.closeModal = () => document.getElementById('clearModal').classList.add('hidden');
+        window.performClear = () => { localStorage.clear(); location.reload(); };
+
+        window.onload = () => {
+            const today = new Date().toLocaleDateString('en-GB');
+            document.getElementById('report-date').value = today;
+            document.getElementById('staff-name').value = localStorage.getItem('open_staff') || '';
+            document.getElementById('opening-notes').value = localStorage.getItem('open_notes') || '';
+            render();
+        };
+    </script>
+</body>
+</html>
+
+```
