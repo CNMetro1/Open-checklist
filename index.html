@@ -4,17 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1A1C21">
+    
+    <!-- PWA Primary Trigger: Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Opening Checklist">
+    
+    <!-- iOS Specific Meta Tags -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExNSIgZmlsbD0iIzFBMUMyMSIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY0LCA4MCkgc2NhbGUoMC43NSkiPjxwYXRoIGQ9Ik0yNTYgMTBDMTE5LjYgMTAgOCAxMjEuNiA4IDI1NnMxMTEuNiAyNDYgMjQ4IDI0NnMyNDgtMTExLjYgMjQ4LTI0NlMzOTIuNCAxMCAyNTYgMTB6bTAgNDQ2Yy0xMTAuNCAwLTIwMC04OS42LTIwMC0yMDBTMTQ1LjYgNTYgMjU2IDU2czIwMCA4OS42IDIwMCAyMDBzLTg5LjYgMjAwLTIwMCAyMDB6IiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik0xMjAgMjU2aDI3MnY0MEgxMjB6IiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik0yNTYgODZ2ODBtMCAxODh2ODBNMzg3IDI1Nmg4ME00NSAyNTZoODAiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvZz48L3N2Zz4=">
+    
     <title>CN Metro: Opening Checklist</title>
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk9wZW5pbmcgQ2hlY2tsaXN0IiwKICAic2hvcnRfbmFtZSI6ICJPcGVuQ2hlY2siLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3ciOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMxQTFDMjEiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi8xMjM0LzEyMzQwMzcucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0KICBdCn0=">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --audit-bg: #F8F9FA; --audit-text-main: #1A1C21; --audit-text-muted: #6B7280; --audit-border: #E5E7EB; --audit-accent-green: #22C55E; --audit-input-bg: #F9FAFB; }
         body { font-family: 'Inter', sans-serif; background-color: var(--audit-bg); color: var(--audit-text-main); min-height: 100vh; padding-bottom: 3rem; -webkit-tap-highlight-color: transparent; }
-        .main-container { background-color: white; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid var(--audit-border); }
+        .main-container { background-color: white; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid var(--audit-border); position: relative; }
         .audit-title { font-weight: 800; font-size: 2.25rem; line-height: 1.1; letter-spacing: -0.02em; }
         .input-label { font-weight: 700; font-size: 0.9rem; color: var(--audit-text-main); margin-bottom: 0.5rem; display: block; }
         .audit-input { width: 100%; padding: 0.875rem 1rem; background-color: var(--audit-input-bg); border: 1px solid var(--audit-border); border-radius: 0.75rem; font-size: 1rem; }
@@ -26,11 +36,16 @@
         .expandable-container { transition: all 0.3s ease-in-out; max-height: 0; overflow: hidden; opacity: 0; }
         .expandable-container.visible { max-height: 1500px; opacity: 1; margin-top: 1rem; }
         .timestamp { font-size: 0.7rem; color: #9CA3AF; font-weight: 600; margin-left: auto; }
+        #pwa-download-btn { position: absolute; top: 1.5rem; right: 1.5rem; display: none; background: #F3F4F6; padding: 0.6rem; border-radius: 0.75rem; cursor: pointer; transition: all 0.2s; border: 1px solid var(--audit-border); z-index: 10; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-4xl mx-auto main-container p-6 md:p-10">
+        <div id="pwa-download-btn" title="Install App">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+
         <header class="mb-8">
             <h1 class="audit-title">Opening Checklist</h1>
             <div class="flex justify-between items-center mt-6">
@@ -72,17 +87,36 @@
     </div>
 
     <script>
-        // --- Service Worker Registration ---
+        // --- PWA Service Worker & Install Logic ---
         if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'opening-checklist-v1';
-                self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE_NAME).then((c) => c.add(location.href))));
-                self.addEventListener('fetch', (e) => e.respondWith(caches.match(e.request).then((r) => r || fetch(e.request))));
-            `;
-            const blob = new Blob([swCode], { type: 'text/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob));
+            window.addEventListener('load', () => {
+                const swCode = `
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+                    self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob));
+            });
         }
 
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwa-download-btn').style.display = 'block';
+        });
+
+        document.getElementById('pwa-download-btn')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') document.getElementById('pwa-download-btn').style.display = 'none';
+                deferredPrompt = null;
+            }
+        });
+
+        // --- App Logic ---
         const STEPS = [
             { title: "Prep & Machines", items: ["Turn on Coffee Machines, Bar Ovens & Blenders", "Pre-heat Oven (190°C x10min)", "Turn dishwasher on", "Turn on boiler"] },
             { title: "Pastries & Tills", items: ["Tray Pastries", "Bake Pastries (x20-30m)", "Bake De Nata's (x10-12min)", "Count the tills", "Count safe"] },
@@ -194,3 +228,4 @@
     </script>
 </body>
 </html>
+
